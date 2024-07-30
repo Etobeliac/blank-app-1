@@ -82,7 +82,7 @@ def main():
             st.download_button(
                 label="Télécharger les résultats (Excel)",
                 data=output,
-                file_name="domaines_classes_mises_a_jour.xlsx",
+                file_name="domaines_classes.xlsx",
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             )
 
