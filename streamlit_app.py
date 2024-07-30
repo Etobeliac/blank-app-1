@@ -7,7 +7,7 @@ def read_script_content(script_path):
             content = file.read()
             return content if content else "# Ce fichier est vide."
     except FileNotFoundError:
-        return "# Le fichier n'a pas été trouvé."
+        return f"# Le fichier '{script_path}' n'a pas été trouvé."
     except Exception as e:
         return f"# Une erreur s'est produite lors de la lecture du fichier : {str(e)}"
 
@@ -17,14 +17,15 @@ def main():
     # Obtenir le chemin absolu du répertoire du script
     script_dir = os.path.dirname(os.path.abspath(__file__))
     
-    # Afficher le répertoire de travail pour le débogage
-    st.sidebar.write(f"Répertoire de travail: {script_dir}")
-
+    # Afficher des informations de débogage
+    st.sidebar.write("### Informations de débogage")
+    st.sidebar.write(f"Répertoire du script: {script_dir}")
+    st.sidebar.write(f"Contenu du répertoire: {os.listdir(script_dir)}")
+    
     # Obtenir la liste des fichiers Python dans le répertoire du script
     script_files = [f for f in os.listdir(script_dir) if f.endswith('.py') and f != 'streamlit_app.py']
-
-    # Afficher la liste des fichiers trouvés pour le débogage
-    st.sidebar.write("Fichiers Python trouvés:", script_files)
+    
+    st.sidebar.write(f"Fichiers Python trouvés: {script_files}")
 
     # Création de deux colonnes
     col1, col2 = st.columns([1, 3])
@@ -34,6 +35,7 @@ def main():
         st.header("Sélectionnez un script")
         if script_files:
             selected_script = st.selectbox("", script_files)
+            st.write(f"Script sélectionné: {selected_script}")
         else:
             st.warning("Aucun script Python trouvé dans le répertoire.")
             return
@@ -44,12 +46,12 @@ def main():
         if selected_script:
             st.subheader(f"Contenu de {selected_script}")
             script_path = os.path.join(script_dir, selected_script)
+            st.write(f"Chemin complet du script: {script_path}")
             script_content = read_script_content(script_path)
             st.code(script_content, language='python')
 
-            # Bouton pour exécuter le script (simulation)
             if st.button("Exécuter le script"):
-                st.info("Simulation de l'exécution du script. Dans une vraie application, le script serait exécuté ici.")
+                st.info("Simulation de l'exécution du script.")
 
 if __name__ == "__main__":
     main()
