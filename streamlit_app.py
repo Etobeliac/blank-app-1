@@ -17,7 +17,7 @@ def main():
     col1, col2 = st.columns([1, 3])
 
     # Obtenir la liste des fichiers Python dans le répertoire courant
-    script_files = [f for f in os.listdir('.') if f.endswith('.py') and f != 'streamlit_app.py']
+    script_files = [f for f in os.listdir('.') if f.endswith('.py') and f != 'app.py']
 
     # Colonne de gauche pour la sélection du script
     with col1:
