@@ -74,7 +74,7 @@ def main():
 
             # Préparation du fichier Excel pour le téléchargement
             output = io.BytesIO()
-            with pd.ExcelWriter(output, engine='openpyxl') as writer:
+            with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
                 df_final.to_excel(writer, index=False, sheet_name='Domaines classifiés')
             output.seek(0)
 
