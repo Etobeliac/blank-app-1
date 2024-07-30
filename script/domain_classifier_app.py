@@ -3,13 +3,6 @@ import pandas as pd
 import io
 import os
 
-def read_script_content(script_path):
-    try:
-        with open(script_path, 'r', encoding='utf-8') as file:
-            return file.read()
-    except Exception as e:
-        return f"Erreur lors de la lecture du fichier : {str(e)}"
-
 def main():
     st.set_page_config(layout="wide", page_title="Classification de Domaines")
 
@@ -55,13 +48,9 @@ def main():
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             )
 
-    # Affichage du contenu du script (dans la barre latérale)
+    # Sélection du script dans la barre latérale (sans afficher le contenu)
     st.sidebar.title("Contenu du Script")
-    selected_script = st.sidebar.selectbox("Sélectionnez un script :", script_files)
-    if selected_script:
-        script_path = os.path.join(script_dir, selected_script)
-        script_content = read_script_content(script_path)
-        st.sidebar.code(script_content, language='python')
+    st.sidebar.selectbox("Sélectionnez un script :", script_files)
 
 if __name__ == "__main__":
     main()
