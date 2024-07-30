@@ -14,15 +14,17 @@ def read_script_content(script_path):
 def main():
     st.set_page_config(layout="wide")
 
-    # Obtenir le chemin absolu du répertoire du script
-    script_dir = os.path.dirname(os.path.abspath(__file__))
+    # Obtenir le chemin absolu du répertoire du projet
+    project_dir = os.path.dirname(os.path.abspath(__file__))
+    script_dir = os.path.join(project_dir, 'script')
     
     # Afficher des informations de débogage
     st.sidebar.write("### Informations de débogage")
-    st.sidebar.write(f"Répertoire du script: {script_dir}")
-    st.sidebar.write(f"Contenu du répertoire: {os.listdir(script_dir)}")
+    st.sidebar.write(f"Répertoire du projet: {project_dir}")
+    st.sidebar.write(f"Répertoire des scripts: {script_dir}")
+    st.sidebar.write(f"Contenu du répertoire des scripts: {os.listdir(script_dir)}")
     
-    # Obtenir la liste des fichiers Python dans le répertoire du script
+    # Obtenir la liste des fichiers Python dans le répertoire 'script'
     script_files = [f for f in os.listdir(script_dir) if f.endswith('.py') and f != 'streamlit_app.py']
     
     st.sidebar.write(f"Fichiers Python trouvés: {script_files}")
@@ -37,7 +39,7 @@ def main():
             selected_script = st.selectbox("", script_files)
             st.write(f"Script sélectionné: {selected_script}")
         else:
-            st.warning("Aucun script Python trouvé dans le répertoire.")
+            st.warning("Aucun script Python trouvé dans le répertoire 'script'.")
             return
 
     # Colonne de droite pour afficher le contenu du script
