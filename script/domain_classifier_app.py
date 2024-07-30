@@ -1,6 +1,5 @@
 import streamlit as st
 import pandas as pd
-import io
 
 def read_excel(file):
     return pd.read_excel(file)
@@ -71,17 +70,6 @@ def main():
 
             st.write("Aperçu des résultats :")
             st.dataframe(df_final)
-
-            # Conversion du DataFrame en CSV pour le téléchargement
-            csv = df_final.to_csv(index=False).encode('utf-8')
-
-            # Bouton de téléchargement
-            st.download_button(
-                label="Télécharger les résultats (CSV)",
-                data=csv,
-                file_name="domaines_classes.csv",
-                mime="text/csv"
-            )
 
 if __name__ == "__main__":
     main()
