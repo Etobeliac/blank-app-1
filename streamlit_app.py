@@ -17,12 +17,16 @@ def main():
     col1, col2 = st.columns([1, 3])
 
     # Obtenir la liste des fichiers Python dans le répertoire courant
-    script_files = [f for f in os.listdir('.') if f.endswith('.py')]
+    script_files = [f for f in os.listdir('.') if f.endswith('.py') and f != 'streamlit_app.py']
 
     # Colonne de gauche pour la sélection du script
     with col1:
         st.header("Sélectionnez un script")
-        selected_script = st.selectbox("", script_files)
+        if script_files:
+            selected_script = st.selectbox("", script_files)
+        else:
+            st.write("Aucun script Python trouvé dans le répertoire.")
+            return
 
     # Colonne de droite pour afficher le contenu du script
     with col2:
