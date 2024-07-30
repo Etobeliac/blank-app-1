@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 import io
-from openpyxl import Workbook
 
 def read_excel(file):
     return pd.read_excel(file)
@@ -76,7 +75,7 @@ def main():
             # Préparation du fichier Excel pour le téléchargement
             output = io.BytesIO()
             with pd.ExcelWriter(output, engine='openpyxl') as writer:
-                df_final.to_excel(writer, sheet_name='Domaines classifiés', index=False)
+                df_final.to_excel(writer, index=False, sheet_name='Domaines classifiés')
             output.seek(0)
 
             # Bouton de téléchargement
