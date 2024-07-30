@@ -1,79 +1,67 @@
-import pandas as pd
 import streamlit as st
+import pandas as pd
 import io
+import os
 
-# Définition des thématiques et mots-clés
-thematique_dict = {
-    'ANIMAUX': ['animal', 'pet', 'zoo', 'farm', 'deer', 'chiens', 'chats', 'animaux'],
-    'CUISINE': ['cook', 'recipe', 'cuisine', 'food', 'bon plan', 'equipement', 'minceur', 'produit', 'restaurant'],
-    'ENTREPRISE': ['business', 'enterprise', 'company', 'corporate', 'formation', 'juridique', 'management', 'marketing', 'services'],
-    'FINANCE / IMMOBILIER': ['finance', 'realestate', 'investment', 'property', 'assurance', 'banque', 'credits', 'immobilier'],
-    'INFORMATIQUE': ['tech', 'computer', 'software', 'IT', 'high tech', 'internet', 'jeux-video', 'marketing', 'materiel', 'smartphones'],
-    'MAISON': ['home', 'house', 'garden', 'interior', 'deco', 'demenagement', 'equipement', 'immo', 'jardin', 'maison', 'piscine', 'travaux'],
-    'MODE / FEMME': ['fashion', 'beauty', 'cosmetics', 'woman', 'beaute', 'bien-etre', 'lifestyle', 'mode', 'shopping'],
-    'SANTE': ['health', 'fitness', 'wellness', 'medical', 'hospital', 'grossesse', 'maladie', 'minceur', 'professionnels', 'sante', 'seniors'],
-    'SPORT': ['sport', 'fitness', 'football', 'soccer', 'basketball', 'tennis', 'autre sport', 'basket', 'combat', 'foot', 'musculation', 'velo'],
-    'TOURISME': ['travel', 'tourism', 'holiday', 'vacation', 'bon plan', 'camping', 'croisiere', 'location', 'tourisme', 'vacance', 'voyage'],
-    'VEHICULE': ['vehicle', 'car', 'auto', 'bike', 'bicycle', 'moto', 'produits', 'securite', 'voiture']
-}
-
-def classify_domain(domain, categories):
-    domain_lower = domain.lower()
-    for category, keywords in categories.items():
-        for keyword in keywords:
-            if keyword in domain_lower:
-                return category
-    return 'NON UTILISÉ'
+def read_script_content(script_path):
+    try:
+        with open(script_path, 'r', encoding='utf-8') as file:
+            return file.read()
+    except Exception as e:
+        return f"Erreur lors de la lecture du fichier : {str(e)}"
 
 def main():
-    st.title("Classification avancée de noms de domaine")
+    st.set_page_config(layout="wide", page_title="Classification de Domaines")
 
-    uploaded_file = st.file_uploader("Déposez votre fichier Excel contenant les domaines", type=["xlsx"])
-    
-    if uploaded_file is not None:
-        df = pd.read_excel(uploaded_file)
-        
-        if 'Domain' not in df.columns:
-            st.error("Le fichier doit contenir une colonne 'Domain'")
-            return
+    project_dir = os.path.dirname(os.path.abspath(__file__))
+    script_dir = os.path.join(project_dir, 'script')
+    script_files = [f for f in os.listdir(script_dir) if f.endswith('.py')]
 
-        # Classification des domaines
-        df['Category'] = df['Domain'].apply(lambda x: classify_domain(x, thematique_dict))
+    st.title("Classification de Domaines")
 
-        # Séparation des domaines utilisés et non utilisés
-        df_used = df[df['Category'] != 'NON UTILISÉ']
-        df_not_used = df[df['Category'] == 'NON UTILISÉ']
+    # Zone de texte pour coller les noms de domaine
+    domain_input = st.text_area("Collez vos noms de domaine ici (un par ligne)", height=200)
 
-        # Création du DataFrame final
-        df_final = df_used.copy()
-        df_final['Non Utilisé'] = pd.NA
-        df_final = pd.concat([df_final, pd.DataFrame({'Domain': pd.NA, 'Category': pd.NA, 'Non Utilisé': df_not_used['Domain']})], ignore_index=True)
+    if domain_input:
+        # Conversion du texte en DataFrame
+        domains = [domain.strip() for domain in domain_input.split('\n') if domain.strip()]
+        df = pd.DataFrame({'Domaine': domains})
 
-        st.subheader("Aperçu des résultats")
-        st.write(df_final)
+        st.write("Aperçu des données :")
+        st.dataframe(df.head())
 
-        # Statistiques
-        st.subheader("Statistiques")
-        total_domains = len(df)
-        used_domains = len(df_used)
-        not_used_domains = len(df_not_used)
-        st.write(f"Total des domaines : {total_domains}")
-        st.write(f"Domaines classifiés : {used_domains}")
-        st.write(f"Domaines non utilisés : {not_used_domains}")
+        if st.button("Classifier les domaines"):
+            # Ici, vous pouvez ajouter la logique de classification
+            st.success("Classification terminée !")
 
-        # Téléchargement des résultats
-        output = io.BytesIO()
-        with pd.ExcelWriter(output, engine='openpyxl') as writer:
-            df_final.to_excel(writer, sheet_name='Domaines classifiés', index=False)
+            # Simulation de résultats
+            used_domains = len(df) // 2
+            not_used_domains = len(df) - used_domains
 
-        output.seek(0)
-        
-        st.download_button(
-            label="Télécharger les résultats (Excel)",
-            data=output,
-            file_name="domaines_classes_mises_a_jour.xlsx",
-            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-        )
+            st.write(f"Domaines classifiés : {used_domains}")
+            st.write(f"Domaines non utilisés : {not_used_domains}")
+
+            # Préparation du fichier Excel pour le téléchargement
+            output = io.BytesIO()
+            with pd.ExcelWriter(output, engine='openpyxl') as writer:
+                df.to_excel(writer, sheet_name='Domaines classifiés', index=False)
+            output.seek(0)
+
+            # Bouton de téléchargement
+            st.download_button(
+                label="Télécharger les résultats (Excel)",
+                data=output,
+                file_name="domaines_classes_mises_a_jour.xlsx",
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            )
+
+    # Affichage du contenu du script (dans la barre latérale)
+    st.sidebar.title("Contenu du Script")
+    selected_script = st.sidebar.selectbox("Sélectionnez un script :", script_files)
+    if selected_script:
+        script_path = os.path.join(script_dir, selected_script)
+        script_content = read_script_content(script_path)
+        st.sidebar.code(script_content, language='python')
 
 if __name__ == "__main__":
     main()
