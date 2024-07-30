@@ -1,61 +1,50 @@
 import streamlit as st
-import os
 import pandas as pd
 
-def read_script_content(script_path):
-    try:
-        with open(script_path, 'r', encoding='utf-8') as file:
-            return file.read()
-    except Exception as e:
-        return f"Erreur lors de la lecture du fichier : {str(e)}"
+def classify_domain(domain, categories):
+    for category, keywords in categories.items():
+        for keyword in keywords:
+            if keyword in domain.lower():
+                return category
+    return 'NON UTILISÉ'
 
-def main():
-    st.set_page_config(layout="wide", page_title="Classification de Domaines")
+st.title("Classification de Domaines")
 
-    project_dir = os.path.dirname(os.path.abspath(__file__))
-    script_dir = os.path.join(project_dir, 'script')
-    script_files = [f for f in os.listdir(script_dir) if f.endswith('.py')]
+# Dictionnaire des thématiques
+thematique_dict = {
+    'ANIMAUX': ['animal', 'pet', 'zoo', 'farm', 'deer', 'chiens', 'chats', 'animaux'],
+    'CUISINE': ['cook', 'recipe', 'cuisine', 'food', 'bon plan', 'equipement', 'minceur', 'produit', 'restaurant'],
+    'ENTREPRISE': ['business', 'enterprise', 'company', 'corporate', 'formation', 'juridique', 'management', 'marketing', 'services'],
+    'FINANCE / IMMOBILIER': ['finance', 'realestate', 'investment', 'property', 'assurance', 'banque', 'credits', 'immobilier'],
+    'INFORMATIQUE': ['tech', 'computer', 'software', 'IT', 'high tech', 'internet', 'jeux-video', 'marketing', 'materiel', 'smartphones'],
+    'MAISON': ['home', 'house', 'garden', 'interior', 'deco', 'demenagement', 'equipement', 'immo', 'jardin', 'maison', 'piscine', 'travaux'],
+    'MODE / FEMME': ['fashion', 'beauty', 'cosmetics', 'woman', 'beaute', 'bien-etre', 'lifestyle', 'mode', 'shopping'],
+    'SANTE': ['health', 'fitness', 'wellness', 'medical', 'hospital', 'grossesse', 'maladie', 'minceur', 'professionnels', 'sante', 'seniors'],
+    'SPORT': ['sport', 'fitness', 'football', 'soccer', 'basketball', 'tennis', 'autre sport', 'basket', 'combat', 'foot', 'musculation', 'velo'],
+    'TOURISME': ['travel', 'tourism', 'holiday', 'vacation', 'bon plan', 'camping', 'croisiere', 'location', 'tourisme', 'vacance', 'voyage'],
+    'VEHICULE': ['vehicle', 'car', 'auto', 'bike', 'bicycle', 'moto', 'produits', 'securite', 'voiture']
+}
 
-    st.title("Classification de Domaines")
+# Zone de texte pour coller les noms de domaine
+domain_input = st.text_area("Collez vos noms de domaine ici (un par ligne)", height=200)
 
-    # Zone de drag and drop pour le fichier Excel
-    uploaded_file = st.file_uploader("Glissez et déposez votre fichier Excel ici", type=['xlsx', 'xls'])
+if domain_input and st.button("Classifier les domaines"):
+    domains = [domain.strip() for domain in domain_input.split('\n') if domain.strip()]
+    
+    # Classification des domaines
+    classified_domains = [(domain, classify_domain(domain, thematique_dict)) for domain in domains]
 
-    if uploaded_file is not None:
-        df = pd.read_excel(uploaded_file)
-        st.write("Aperçu des données :")
-        st.dataframe(df.head())
+    # Création du DataFrame
+    df = pd.DataFrame(classified_domains, columns=['Domain', 'Category'])
 
-        # Sélection de la colonne contenant les domaines
-        domain_column = st.selectbox("Sélectionnez la colonne contenant les domaines :", df.columns)
+    # Séparation des domaines utilisés et non utilisés
+    df_used = df[df['Category'] != 'NON UTILISÉ']
+    df_not_used = df[df['Category'] == 'NON UTILISÉ']
 
-        if st.button("Classifier les domaines"):
-            # Ici, vous pouvez ajouter la logique de classification
-            st.success("Classification terminée !")
+    # Ajout des domaines non utilisés dans une nouvelle colonne
+    df_final = df_used.copy()
+    df_final['Non Utilisé'] = pd.NA
+    df_final = pd.concat([df_final, pd.DataFrame({'Domain': pd.NA, 'Category': pd.NA, 'Non Utilisé': df_not_used['Domain']})], ignore_index=True)
 
-            # Simulation de résultats
-            used_domains = len(df) // 2
-            not_used_domains = len(df) - used_domains
-
-            st.write(f"Domaines classifiés : {used_domains}")
-            st.write(f"Domaines non utilisés : {not_used_domains}")
-
-            # Bouton de téléchargement (simulation)
-            output = df.to_excel(index=False)
-            st.download_button(
-                label="Télécharger les résultats (Excel)",
-                data=output,
-                file_name="domaines_classes_mises_a_jour.xlsx",
-                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-            )
-
-    # Affichage du contenu du script (optionnel, vous pouvez le garder ou le supprimer)
-    st.sidebar.title("Contenu du Script")
-    selected_script = st.sidebar.selectbox("Sélectionnez un script :", script_files)
-    if selected_script:
-        script_path = os.path.join(script_dir, selected_script)
-        script_content = read_script_content(script_path)
-        st.sidebar.code(script_content, language='python')
-
-if __name__ == "__main__":
-    main()
+    st.write("Résultats de la classification :")
+    st.dataframe(df_final)
