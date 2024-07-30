@@ -72,19 +72,15 @@ def main():
             st.write("Aperçu des résultats :")
             st.dataframe(df_final)
 
-            # Préparation du fichier Excel pour le téléchargement
-            output = io.BytesIO()
-            with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
-                df_final.to_excel(writer, index=False, sheet_name='Domaines classifiés')
-                writer.save()  # Sauvegarde le fichier
-            output.seek(0)
+            # Conversion du DataFrame en CSV pour le téléchargement
+            csv = df_final.to_csv(index=False).encode('utf-8')
 
             # Bouton de téléchargement
             st.download_button(
-                label="Télécharger les résultats (Excel)",
-                data=output,
-                file_name="domaines_classes.xlsx",
-                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                label="Télécharger les résultats (CSV)",
+                data=csv,
+                file_name="domaines_classes.csv",
+                mime="text/csv"
             )
 
 if __name__ == "__main__":
